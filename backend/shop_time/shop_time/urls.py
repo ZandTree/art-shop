@@ -8,11 +8,14 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
-    url('', include('social_django.urls', namespace='social'))
+    url('', include('social_django.urls', namespace='social')),
+    url('auth/', include('djoser.social.urls')),
+    
     
 ]
 if settings.DEBUG:

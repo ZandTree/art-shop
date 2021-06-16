@@ -1,5 +1,5 @@
 import authAPI from '@/api/auth'
-
+import axios from 'axios'
 
 
 const state ={
@@ -7,14 +7,25 @@ const state ={
   loginFailure:false,
   loginSuccess:false,
   showEmailCheck:'',
+  // confirmation sent to email after signUp
   confirmation:false,
-  user:{},
-  accessToken:'',
-  refreshToken:'',
+  user:null,
+  accessToken:null,
+  refreshToken:null,
+  isLogIn:null, // null,false,true,
+  googleAuthSuccess:null,
+  googleAuthFail:null
+
   
 }
 
 const mutations = {
+  CLEAR_CREDS(state){
+    state.isLogIn=false,
+    state.accessToken=null,
+    state.refreshToken=null,
+    state.user =null
+  },
   REGISTER_FAILURE(state){
     state.signUpFailure = true;
   },
@@ -41,6 +52,9 @@ const mutations = {
   },
   SET_USER(state,user){
     state.user = user
+  },
+  SET_LOG_IN(state){
+    state.isLogIn = true
   }
   
 }
@@ -111,19 +125,45 @@ const actions = {
       }
     
   },
+  async registerGoogle() {
+    console.log("sending get req to google")
+    try{
+      console.log("in block try")
+      // const resp = await authAPI.registerGoogle()
+        let url = 'http://localhost:8080'
+        const resp = await  axios.get(`http:8000/auth/o/google-oauth2/?redirect_uri=${url}/google`)
+      // change page on my website to google page
+      // window.location.replace(resp.data.authorization_url);
+      return resp
+
+    }catch(err){
+      console.log("error during google auth-n",err)
+      console.log(Object.keys(err))
+      console.dir(err)
+      return err
+    }
+  }, 
   async getUser({commit},token){    
     try{
+      console.log("inside get User, waking djoser /me ")
       const resp= await authAPI.getUser(token)
       if(resp.status === 200){
         const user = JSON.stringify(resp.data)
         console.log("user from djoser ",user)
-        commit('SET_USER',user)        
+        commit('SET_USER',user)
+        commit('SET_LOG_IN')        
         }
       }
       catch(err){
         console.log("smth went wrong with getUser function")
       }
+    },
+    signOut({commit}){
+      console.log("store starts sign out")
+      commit('CLEAR_CREDS')
+      console.log("local storage is clear")
     }
+  
 }
 
   

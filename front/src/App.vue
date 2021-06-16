@@ -21,4 +21,8 @@ export default {
 </script>
 
 <style>
+#app{
+  background-color: cornsilk;
+  height: 100vh;
+}
 </style>

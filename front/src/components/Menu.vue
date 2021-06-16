@@ -21,7 +21,15 @@
           <router-link :to="{ name: 'login' }" class="link-decor"
               >Login</router-link
             >
-          </b-nav-item>
+        </b-nav-item>
+        <b-nav-item href="#" >
+          <router-link :to="{ name: 'google' }" class="link-decor"
+              >Login via Google</router-link
+            >
+        </b-nav-item>
+        <b-nav-item href="#" >
+          <a href="#" @click="doSignOut">Sign Out</a>
+        </b-nav-item>
       </b-navbar-nav>
 
       <!-- Right aligned nav items -->
@@ -43,7 +51,13 @@
 </template>
 <script>
 export default {
-    name:'Menu'
+    name:'Menu',
+    methods:{
+      doSignOut(){
+        console.log("Sign out...")
+        this.$store.dispatch('signOut')
+      }
+    }
 }
 </script>
 <style>

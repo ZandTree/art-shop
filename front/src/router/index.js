@@ -5,6 +5,8 @@ import SignUp from "@/views/auth/SignUp";
 import ConfirmEmail from '@/views/auth/ConfirmEmail'
 import Login from '@/views/auth/Login'
 import Activate from '@/views/auth/Activate'
+import Google from '@/views/auth/Google'
+import GoogleForm from '@/views/auth/GoogleForm'
 
 Vue.use(VueRouter);
 
@@ -23,6 +25,16 @@ const routes = [
     path: "/login",
     name: "login",
     component: Login,
+  },
+  {
+    path: "/google-login",
+    name: "google",
+    component: Google,
+  },
+  {
+    path: "/google",
+    name: "google-form",
+    component: GoogleForm,
   },
   {
     path: "/confirm-email-link/",
