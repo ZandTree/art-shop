@@ -27,6 +27,7 @@
 </template>
                         
 <script>
+import {actionTypes} from '@/store/modules/auth'
 // '@/components/userUI/pswActions/ChangePassword'
 export default {
     name:"AppActivate",
@@ -40,7 +41,7 @@ export default {
         activateAccount(){
            let uid= this.$route.params.uid;
            let token = this.$route.params.token; 
-            this.$store.dispatch('activate',{
+            this.$store.dispatch(actionTypes.activate,{
                 uid:uid,
                 token:token
             })

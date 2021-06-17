@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     
-      <Menu></Menu>
+      <app-menu></app-menu>
     <h1>App greets you</h1>     
    
     <div class="container">
@@ -12,11 +12,15 @@
   
 </template>
 <script>
-import Menu from '@/components/Menu'
+import AppMenu from '@/components/Menu'
+
+
 export default { 
+  name:'App',
   components:{
-    Menu
-  } 
+    AppMenu
+  },
+  
 }
 </script>
 

@@ -19,6 +19,7 @@
 <script>
 // import axios from '@/api/axios'
 import axios from 'axios'
+import {actionTypes} from '@/store/modules/auth'
 export default {
     name:"AppGoogleForm",
     data(){
@@ -45,15 +46,12 @@ export default {
             console.log("details are",details)
             const formBody = Object.keys(details).map(key=> encodeURIComponent(key)+'='+encodeURIComponent(details[key])).join('&')
             console.log("form body is",formBody)
-            /*
-            
-            */
             try{                
                 const resp = await axios.post(`http://localhost:8000/auth/o/google-oauth2/?${formBody}`,config);
                 console.log("resp is",resp)
                 if(resp.data.access){
                     console.log("google gives me an access token");
-                    this.$store.dispatch('getUser',resp.data.access)
+                    this.$store.dispatch(actionTypes.getUser,resp.data.access)
                 }
                 this.$router.push({name:'home'})
             }catch(err){
@@ -62,8 +60,7 @@ export default {
                 console.dir(err)
                 console.log('data',err.response.data)
             }
-        }
-            
+        }            
       }       
     },
     created(){

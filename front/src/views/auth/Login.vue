@@ -68,13 +68,17 @@
                     <b-button type="submit" variant="primary">Submit</b-button>
                   </b-col >       
                 </b-row>
-            </b-form>                
-          </div>
-         </div>
-    </div>         
+            </b-form> 
+        <p class="mt-3">Not registed?<span class="mute-link"><router-link :to='{name:"signup"}'>Sign Up</router-link></span>
+        </p>
+        <p class="mt-3">Forgot yout password?<span class="mute-link"><a href="#">Here</a></span></p>               
+      </div>
+    </div>
+  </div>         
 </template>
                         
 <script>
+import {actionTypes} from '@/store/modules/auth'
 export default {
     name:"AppLogin",
     data(){
@@ -96,7 +100,7 @@ export default {
        onSubmit(){
          let data={email:this.email,password:this.psw}
          // first request to get tokens
-         this.$store.dispatch('login',data)
+         this.$store.dispatch(actionTypes.login,data)
          .then((resp)=>{  
            console.log("got resp from store:",resp)
            if(resp.status ===200){
@@ -105,7 +109,7 @@ export default {
                this.successMsg = "You are successfully inlogged"
                setTimeout(()=>{
                  this.$router.push({name:"home"})
-               },3000)
+               },2000)
              }
            }else if(resp.response.status === 401){
              // No active account found with the given credentials
@@ -122,7 +126,9 @@ export default {
          .catch((err)=>{   
            // user banned?        
              console.log("catch in login component")
-             console.dir(err)               
+             console.dir(err) 
+             alert("A server/network error occured.Sorry about this - we will get it fixed shortly. ");
+                          
            })          
        }
   } 

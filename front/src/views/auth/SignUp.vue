@@ -100,6 +100,7 @@
         </b-col>
       </b-row>
     </b-form>
+    <p class="mt-3">Already have an account?<span class="mute-link"><router-link :to='{name:"login"}'>Sign Up</router-link></span></p>
     
     <!-- <b-card class="mt-3" header="Form Data Result">
       <pre class="m-0">{{form}} <braces class=""></braces></pre>
@@ -109,6 +110,7 @@
 </template>
 
 <script>
+import {actionTypes} from '@/store/modules/auth'
 export default {
   name: "AppSignUp",
   data(){
@@ -133,7 +135,7 @@ export default {
   methods:{
     onSubmit(){
       console.log("submitting the form");
-      this.$store.dispatch('register',{
+      this.$store.dispatch(actionTypes.register,{
         email:this.email,
         first_name:this.firstName,
         last_name:this.lastName,

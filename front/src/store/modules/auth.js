@@ -1,65 +1,115 @@
 import authAPI from '@/api/auth'
-import axios from 'axios'
 
+export const mutationTypes = {
+  CLEAR_CREDS:'[auth] CLEAR_CREDS',
+  PASS_EMAIL_POTENTIAL_USER:'[auth] PASS_EMAIL_POTENTIAL_USER',
+  REGISTER_FAILURE:'[auth] REGISTER_FAILURE',
+  SET_ACCESS_TOKEN:'[auth] SET_ACCESS_TOKEN',
+  SET_CONFIRM:'[auth] SET_CONFIRM',
+  SET_LOG_IN:'[auth] SET_LOG_IN',
+  SET_LOGIN_SUCCESS:'[auth] SET_LOGIN_SUCCESS',
+  SET_LOGIN_FAILURE:'[auth] SET_LOGIN_FAILURE',
+  SET_REFRESH_TOKEN:'[auth] SET_REFRESH_TOKEN',
+  SET_USER:'[auth] SET_USER',
 
-const state ={
-  signUpFailure:false,
-  loginFailure:false,
-  loginSuccess:false,
-  showEmailCheck:'',
-  // confirmation sent to email after signUp
-  confirmation:false,
-  user:null,
-  accessToken:null,
-  refreshToken:null,
-  isLogIn:null, // null,false,true,
-  googleAuthSuccess:null,
-  googleAuthFail:null
-
-  
+}
+export const actionTypes = {
+  register:'[auth] register',
+  activate:'[auth] activate',
+  login:'[auth] login',
+  getUser:'[auth] getUser',
+  signOut:'[auth] signOut'
+}
+export const getterTypes = {
+  currentUser:'[auth] currentUser',
+  isLoggedIn:'[auth] isLoggedIn',
+  isAnonymous:'[auth] isAnonymous'
 }
 
+const state ={
+  accessToken:null,
+  refreshToken:null,
+  confirmation:false,
+  googleAuthSuccess:null,
+  googleAuthFail:null,  
+  loginFailure:false,
+  loginSuccess:false,
+  isLogIn:null, // null,false,true,  
+  signUpFailure:false,
+  showEmailCheck:'',
+  // confirmation sent to email after signUp
+  user:null,
+  userId:null,
+
+}
+const getters = {
+  [getterTypes.currentUser]:state=>{
+    return state.user||JSON.parse(localStorage.getItem('user'))
+  },
+  [getterTypes.isLoggedIn]:state=>{
+    // scheiden false|null
+    console.log("getter isLoggedIn",Boolean(state.isLogIn))
+    return Boolean(state.isLogIn)
+  },
+  [getterTypes.isAnonymous]:state=>{
+    // scheiden false|null
+    console.log("getter isAnonym",state.isLogIn===null)
+    return state.isLogIn === null
+  }
+}
+
+
 const mutations = {
-  CLEAR_CREDS(state){
-    state.isLogIn=false,
-    state.accessToken=null,
-    state.refreshToken=null,
+  [mutationTypes.CLEAR_CREDS](state){
+    state.isLogIn=false
+    state.accessToken=null
+    state.refreshToken=null
     state.user =null
+    state.isLogIn = false
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('userId');
+    
   },
-  REGISTER_FAILURE(state){
-    state.signUpFailure = true;
-  },
-  PASS_EMAIL_POTENTIAL_USER(state,email) {
+  [mutationTypes.PASS_EMAIL_POTENTIAL_USER](state,email) {
     console.log("inside mutation PASS EMAIL POT USER with email",email)
     state.showEmailCheck=email;
   },
-  SET_CONFIRM(state){
-    state.confirmation = true
+  [ mutationTypes.REGISTER_FAILURE](state){
+    state.signUpFailure = true;
   },
-  SET_LOGIN_FAILURE(state){
-    state.loginFailure = true
-  },
-  SET_LOGIN_SUCCESS(state){
-    state.loginSuccess = true
-  },
-  SET_ACCESS_TOKEN(state,access){
+  [mutationTypes.SET_ACCESS_TOKEN](state,access){
     localStorage.setItem("accessToken",access)
     state.accessToken = access
   },
-  SET_REFRESH_TOKEN(state,refresh){
+  [mutationTypes.SET_CONFIRM](state){
+    state.confirmation = true
+  },
+  [mutationTypes.SET_LOG_IN](state){
+    state.isLogIn = true
+  },
+  [mutationTypes.SET_LOGIN_SUCCESS](state){
+    state.loginSuccess = true
+  },
+  [mutationTypes.SET_LOGIN_FAILURE](state){
+    state.loginFailure = true
+  },  
+  
+  [mutationTypes.SET_REFRESH_TOKEN](state,refresh){
     localStorage.setItem("refreshToken",refresh)
     state.refreshToken = refresh
   },
-  SET_USER(state,user){
+  [mutationTypes.SET_USER](state,user){
+    const userForLocalStorage = JSON.stringify(user)
+    localStorage.setItem("user",userForLocalStorage)
     state.user = user
-  },
-  SET_LOG_IN(state){
-    state.isLogIn = true
-  }
+    state.userId = user.id
+  },  
   
 }
 const actions = {
-    async register({commit},creds){
+    async [actionTypes.register]({commit},creds){
         console.log("store dispatching with creds",creds)
         let servResp = {
             status:"",
@@ -75,18 +125,18 @@ const actions = {
           servResp.status = resp.status;
           console.log('in store action register status is:',resp.status)
           servResp.email = resp.data.email;     
-          commit('PASS_EMAIL_POTENTIAL_USER',resp.data.email);          
+          commit(mutationTypes.PASS_EMAIL_POTENTIAL_USER,resp.data.email);          
           // let op:status is already above, but email is creaded here
           return resp            
   },
-  activate({commit},creds){
+  [actionTypes.activate]({commit},creds){
     // endpoint will return only: response status=204, no data
     return new Promise((resolve,reject)=>{
       let status = ""
       authAPI.activate(creds)
       .then((resp)=>{
         // dj server response == 204        
-        commit('SET_CONFIRM');
+        commit(mutationTypes.SET_CONFIRM);
         console.log("msg from store: email confirmed")
         status = resp.status
         resolve(status)
@@ -100,20 +150,21 @@ const actions = {
 
     })
   },
-  async login({dispatch,commit},creds){
+  async [actionTypes.login]({dispatch,commit},creds){
     console.log("msg from store... func login")
     try{
     const resp = await authAPI.login(creds)         
         console.log("got from server",resp) 
         if(resp.status ===200){   
           console.log("making mutaions in store")     
-          commit('SET_LOGIN_SUCCESS')  
-          commit('SET_ACCESS_TOKEN',resp.data.access)
-          commit('SET_REFRESH_TOKEN',resp.data.refresh)
+          commit(mutationTypes.SET_LOGIN_SUCCESS)  
+          commit(mutationTypes.SET_ACCESS_TOKEN,resp.data.access)
+          commit(mutationTypes.SET_REFRESH_TOKEN,resp.data.refresh)
         }
         console.log("passing resp to component",resp)
-        console.log("callign for dispatch func for user info")
-        dispatch('getUser',resp.data.access)
+        console.log("calling for getUser for info")
+        // call for user data (user = {id,first_name,last_name,email})
+        dispatch(actionTypes.getUser,resp.data.access)
         return resp
     }  catch(err){
         console.log("store passes this error to component:",err)           
@@ -121,55 +172,37 @@ const actions = {
         localStorage.clear()
         console.log("login failed and Local storage is cleaned")        
         return err
-
       }
     
   },
-  async registerGoogle() {
-    console.log("sending get req to google")
-    try{
-      console.log("in block try")
-      // const resp = await authAPI.registerGoogle()
-        let url = 'http://localhost:8080'
-        const resp = await  axios.get(`http:8000/auth/o/google-oauth2/?redirect_uri=${url}/google`)
-      // change page on my website to google page
-      // window.location.replace(resp.data.authorization_url);
-      return resp
-
-    }catch(err){
-      console.log("error during google auth-n",err)
-      console.log(Object.keys(err))
-      console.dir(err)
-      return err
-    }
-  }, 
-  async getUser({commit},token){    
+  async [actionTypes.getUser]({commit},token){    
+    // data from djoser:userId,
     try{
       console.log("inside get User, waking djoser /me ")
       const resp= await authAPI.getUser(token)
-      if(resp.status === 200){
-        const user = JSON.stringify(resp.data)
+      if(resp.status === 200){  
+        console.log('djoser me',resp.data)
+        let user = resp.data      
         console.log("user from djoser ",user)
-        commit('SET_USER',user)
-        commit('SET_LOG_IN')        
+        commit(mutationTypes.SET_USER,user)
+        commit(mutationTypes.SET_LOG_IN)        
         }
       }
       catch(err){
         console.log("smth went wrong with getUser function")
       }
     },
-    signOut({commit}){
+    [actionTypes.signOut]({commit}){
       console.log("store starts sign out")
-      commit('CLEAR_CREDS')
+      commit(mutationTypes.CLEAR_CREDS)
       console.log("local storage is clear")
     }
   
-}
-
-  
+} 
 
 export default {
-  state,  
+  state,
+  getters,  
   mutations,
   actions
   
