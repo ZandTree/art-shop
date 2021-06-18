@@ -1,7 +1,5 @@
 import axios from '@/api/axios'
 
-
-
 const register = (creds)=>{
     return axios.post('/auth/users/',creds)
 }
@@ -12,10 +10,22 @@ const login = (creds)=>{
     return axios.post('/auth/jwt/create/',creds)
 }
 
-const getUser = (accessToken)=>{
-    axios.defaults.headers.common["Authorization"] = `JWT ${accessToken}`
+// getAPI = with Authorization JWT header
+const getUser = ()=>{
     return axios.get('/auth/users/me/')
 }
+// const getUser = ()=>{
+//     console.log("token is")
+//     const headers ={
+//             'Content-Type':'application/json',
+//             Authorization: localStorage.getItem('accessToken')
+// 			? 'JWT ' + localStorage.getItem('accessToken')
+// 			: null,
+//         }
+//     axios.defaults.headers = headers    
+//     return axios.get('/auth/users/me/')
+// }
+
 const registerGoogle = ()=>{
     console.log("api auth prepares url to send ")
     let url = 'http://localhost:8080'

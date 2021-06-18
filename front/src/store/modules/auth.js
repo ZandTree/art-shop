@@ -1,5 +1,8 @@
 import authAPI from '@/api/auth'
 
+
+
+
 export const mutationTypes = {
   CLEAR_CREDS:'[auth] CLEAR_CREDS',
   PASS_EMAIL_POTENTIAL_USER:'[auth] PASS_EMAIL_POTENTIAL_USER',
@@ -11,6 +14,10 @@ export const mutationTypes = {
   SET_LOGIN_FAILURE:'[auth] SET_LOGIN_FAILURE',
   SET_REFRESH_TOKEN:'[auth] SET_REFRESH_TOKEN',
   SET_USER:'[auth] SET_USER',
+  // current user
+  SET_CURRENT_USER:'[auth] GET_CURRENT_USER_START',
+  GET_CURRENT_USER_SUCCESS:'[auth] GET_CURRENT_USER_SUCCESS',
+  GET_CURRENT_USER_FAILURE:'[auth] GET_CURRENT_USER_FAILURE'
 
 }
 export const actionTypes = {
@@ -31,7 +38,10 @@ const state ={
   refreshToken:null,
   confirmation:false,
   googleAuthSuccess:null,
-  googleAuthFail:null,  
+  googleAuthFail:null,
+  // waiting for current user info
+  isLoading:false,
+  // result of login  
   loginFailure:false,
   loginSuccess:false,
   isLogIn:null, // null,false,true,  
@@ -100,12 +110,20 @@ const mutations = {
     localStorage.setItem("refreshToken",refresh)
     state.refreshToken = refresh
   },
-  [mutationTypes.SET_USER](state,user){
-    const userForLocalStorage = JSON.stringify(user)
-    localStorage.setItem("user",userForLocalStorage)
-    state.user = user
-    state.userId = user.id
-  },  
+  [mutationTypes.GET_CURRENT_USER_START](state){
+    state.isLoading = true
+  },
+  [mutationTypes.SET_CURRENT_USER](state,payload){
+    state.isLoading = false    
+    state.user = payload
+    state.userId = payload.id    
+    localStorage.setItem("user",JSON.stringify(payload))
+  },
+  [mutationTypes.GET_CURRENT_USER_FAILURE](state){
+    state.isLoading = false,
+    state.isLogIn = null,
+    state.currentUser = null
+  },
   
 }
 const actions = {
@@ -150,7 +168,7 @@ const actions = {
 
     })
   },
-  async [actionTypes.login]({dispatch,commit},creds){
+  async [actionTypes.login]({commit},creds){
     console.log("msg from store... func login")
     try{
     const resp = await authAPI.login(creds)         
@@ -164,7 +182,7 @@ const actions = {
         console.log("passing resp to component",resp)
         console.log("calling for getUser for info")
         // call for user data (user = {id,first_name,last_name,email})
-        dispatch(actionTypes.getUser,resp.data.access)
+            
         return resp
     }  catch(err){
         console.log("store passes this error to component:",err)           
@@ -175,23 +193,27 @@ const actions = {
       }
     
   },
-  async [actionTypes.getUser]({commit},token){    
+  
+  async [actionTypes.getUser]({commit}){    
     // data from djoser:userId,
+    console.log("inside getUser")   
     try{
-      console.log("inside get User, waking djoser /me ")
-      const resp= await authAPI.getUser(token)
-      if(resp.status === 200){  
-        console.log('djoser me',resp.data)
-        let user = resp.data      
-        console.log("user from djoser ",user)
-        commit(mutationTypes.SET_USER,user)
-        commit(mutationTypes.SET_LOG_IN)        
+      // commit(mutationTypes.GET_CURRENT_USER_START)   
+      const resp= await authAPI.getUser()
+      if(resp.status === 200){          
+        let user = resp.data             
+        commit(mutationTypes.SET_CURRENT_USER,user)
+        commit(mutationTypes.SET_LOG_IN) 
+        commit(mutationTypes.SET_LOGIN_SUCCESS) 
+        return resp      
         }
       }
       catch(err){
-        console.log("smth went wrong with getUser function")
+        commit(mutationTypes.GET_CURRENT_USER_FAILURE)
+        localStorage.clear()
       }
     },
+    
     [actionTypes.signOut]({commit}){
       console.log("store starts sign out")
       commit(mutationTypes.CLEAR_CREDS)

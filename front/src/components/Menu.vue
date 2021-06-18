@@ -59,6 +59,7 @@ import {actionTypes} from '@/store/modules/auth'
 import {getterTypes} from '@/store/modules/auth'
 import {mapGetters} from 'vuex'
 
+
 export default {
     name:'AppMenu',
     computed:{
@@ -78,6 +79,10 @@ export default {
         this.$store.dispatch( actionTypes.signOut)
         location.reload();
       }
+    },
+    mounted(){
+      this.$store.dispatch(actionTypes.getUser)
+      console.log("menu mounted, call for getUser from store")
     }
 }
 </script>

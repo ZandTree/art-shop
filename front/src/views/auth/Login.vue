@@ -105,12 +105,20 @@ export default {
            console.log("got resp from store:",resp)
            if(resp.status ===200){
              console.log("Login comp and status 200")
-             if(this.$store.state.auth.loginSuccess){
-               this.successMsg = "You are successfully inlogged"
-               setTimeout(()=>{
+           this.$store.dispatch(actionTypes.getUser)
+           .then((resp)=>{ 
+              console.log("do smth with this resp",resp)
+              if(resp){
+                console.log("status",resp.status)
+                this.successMsg = "Success in login"
+                setTimeout(()=>{
                  this.$router.push({name:"home"})
                },2000)
-             }
+              }             
+                                      
+             }).catch((err)=>{
+               console.log(err)
+             })            
            }else if(resp.response.status === 401){
              // No active account found with the given credentials
              console.log(Object.keys(resp.response.data))
